@@ -20,14 +20,6 @@ const Home = () => {
     await fetch('/api/socket');
     socket = io()
 
-    // socket.on('connect', () => {
-    //   console.log('connected')
-    // })
-
-    // socket.on('update-input', msg => {
-    //   setInput(msg)
-    // })
-
     socket.on("newIncomingMessage", (msg) => {
       setMessages((currentMsg) => [
         ...currentMsg,
@@ -39,25 +31,13 @@ const Home = () => {
   }
 
   const sendMessage = async () => {
-    socket.emit("createdMessage", { author: chosenUsername, message });
+    socket.emit("createdMessage", { author: chosenUsername, input });
     setMessages((currentMsg) => [
       ...currentMsg,
       { author: chosenUsername, input }
     ])
   }
 
-  // const onChangeHandler = (e) => {
-  //   setInput(e.target.value)
-  //   socket.emit('input-change', e.target.value)
-  // }
-
-  // return (
-  //   <input
-  //     placeholder="Type something"
-  //     value={input}
-  //     onChange={onChangeHandler}
-  //   />
-  // )
 
   const handleKeypress = (e) => {
     //it triggers by pressing the enter key
@@ -73,11 +53,11 @@ const Home = () => {
       {!chosenUsername ? (
         <>
           <h3>
-            How people should call you?
+            Username
           </h3>
           <input
             type="text"
-            placeholder="Identity..."
+            placeholder="username here..."
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
