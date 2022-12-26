@@ -1,11 +1,11 @@
 import { Server } from 'Socket.IO'
 
 const SocketHandler = (req, res) => {
-  if (res.socket.server.io) {
+  if (res.socket.server.io) { // socket server was already initialised
     console.log('Socket is already running')
   } else {
     console.log('Socket is initializing')
-    const io = new Server(res.socket.server)
+    const io = new Server(res.socket.server) // new connection established!
     res.socket.server.io = io
 
     io.on('connection', socket => {
