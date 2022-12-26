@@ -2,8 +2,13 @@ import { useEffect, useState } from 'react'
 import io from 'Socket.IO-client'
 let socket;
 
+
+
 const Home = () => {
   const [input, setInput] = useState('')
+  const [username, setUsername] = useState('')
+  const [chosenUsername, setChosenUsername] = useState('')
+  const [messages, setMessages] = useState([])
 
   useEffect(() => {
     socketInitializer();
@@ -15,27 +20,81 @@ const Home = () => {
     await fetch('/api/socket');
     socket = io()
 
-    socket.on('connect', () => {
-      console.log('connected')
-    })
+    socket.on("newIncomingMessage", (msg) => {
+      setMessages((currentMsg) => [
+        ...currentMsg,
+        { author: msg.author, message: msg.input }
+      ])
 
-    socket.on('update-input', msg => {
-      setInput(msg)
+      console.log(`Messages: ${messages}`)
     })
   }
 
-  const onChangeHandler = (e) => {
-    setInput(e.target.value)
-    socket.emit('input-change', e.target.value)
+  const sendMessage = async () => {
+    socket.emit("createdMessage", { author: chosenUsername, input });
+    setMessages((currentMsg) => [
+      ...currentMsg,
+      { author: chosenUsername, input }
+    ])
+  }
+
+
+  const handleKeypress = (e) => {
+    //it triggers by pressing the enter key
+    if (e.keyCode === 13) {
+      if (input) {
+        sendMessage()
+      }
+    }
   }
 
   return (
-    <input
-      placeholder="Type something"
-      value={input}
-      onChange={onChangeHandler}
-    />
-  )
+    <>
+      {!chosenUsername ? (
+        <>
+          <h3>
+            Username
+          </h3>
+          <input
+            type="text"
+            placeholder="username here..."
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <button onClick={() => { setChosenUsername(username) }}>
+            Go!
+          </button>
+        </>
+      ) : (
+        <>
+          <p> 
+            Your username: {username}
+          </p>
+          {messages.map((msg, i) => {
+            return (
+              <div key={i}>
+                {msg.author} : {msg.input}
+              </div>
+            );
+          })}
+          <input
+            type="text"
+            placeholder="New message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyUp={handleKeypress}
+          />
+          <button
+            onClick={() => {
+              sendMessage();
+            }}
+          >
+            Send
+          </button>
+        </>
+      )}
+    </>
+  );
 }
 
 export default Home;
